@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker
+*.tar
+
+# Test/temp files
+response_remote.json
+test_payload.json
+test_samples.json
+test_data.csv
+
+# Data files (too large)
+data/*.db
+data/*.sqlite
+*.tar
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Alembic
+alembic/versions/.gitkeep
