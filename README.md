@@ -2,17 +2,35 @@
 
 Cloud backend for the DORY swim training app with lap/stroke detection ML pipeline.
 
-## Quick Start
+## Quick Start (Docker)
 
 ```bash
-# Start PostgreSQL + API
 docker-compose up -d
-
-# Run migrations
 docker-compose exec api alembic upgrade head
-
-# Access API docs
 open http://localhost:8000/docs
+```
+
+## Manual Deployment (No Docker)
+
+```bash
+# 1. Install PostgreSQL and create database
+sudo -u postgres createdb swimdb
+sudo -u postgres createuser swimuser -P
+
+# 2. Setup Python environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 3. Configure environment
+cp .env.example .env
+# Edit .env with your DATABASE_URL
+
+# 4. Run migrations
+alembic upgrade head
+
+# 5. Start server
+uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
 ## Tech Stack
@@ -21,7 +39,6 @@ open http://localhost:8000/docs
 - **PostgreSQL** - Database
 - **SQLAlchemy** - ORM
 - **Alembic** - Migrations
-- **Docker Compose** - Deployment
 
 ## API Endpoints
 
@@ -37,3 +54,4 @@ open http://localhost:8000/docs
 ## ML Pipeline
 
 Upload sensor data via `POST /sessions`, then call `POST /sessions/{id}/process` to run lap/stroke detection.
+

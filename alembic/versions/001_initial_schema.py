@@ -19,18 +19,11 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create enums
-    sex_enum = postgresql.ENUM('M', 'F', name='sex', create_type=False)
-    sex_enum.create(op.get_bind(), checkfirst=True)
-    
-    exercise_category_enum = postgresql.ENUM('sprint', 'distance', name='exercisecategory', create_type=False)
-    exercise_category_enum.create(op.get_bind(), checkfirst=True)
-    
-    goal_type_enum = postgresql.ENUM('sprint', 'endurance', name='goaltype', create_type=False)
-    goal_type_enum.create(op.get_bind(), checkfirst=True)
-    
-    stroke_type_enum = postgresql.ENUM('freestyle', 'backstroke', 'breaststroke', 'butterfly', 'unknown', name='stroketype', create_type=False)
-    stroke_type_enum.create(op.get_bind(), checkfirst=True)
+    # Create enums first
+    op.execute("CREATE TYPE sex AS ENUM ('M', 'F')")
+    op.execute("CREATE TYPE exercisecategory AS ENUM ('sprint', 'distance')")
+    op.execute("CREATE TYPE goaltype AS ENUM ('sprint', 'endurance')")
+    op.execute("CREATE TYPE stroketype AS ENUM ('freestyle', 'backstroke', 'breaststroke', 'butterfly', 'unknown')")
 
     # Teams
     op.create_table('teams',
@@ -58,7 +51,7 @@ def upgrade() -> None:
         sa.Column('name', sa.String(length=100), nullable=False),
         sa.Column('email', sa.String(length=255), nullable=True),
         sa.Column('birthday', sa.Date(), nullable=False),
-        sa.Column('sex', sa.Enum('M', 'F', name='sex'), nullable=False),
+        sa.Column('sex', postgresql.ENUM('M', 'F', name='sex', create_type=False), nullable=False),
         sa.Column('height_cm', sa.Float(), nullable=False),
         sa.Column('weight_kg', sa.Float(), nullable=False),
         sa.Column('wingspan_cm', sa.Float(), nullable=False),
@@ -97,7 +90,7 @@ def upgrade() -> None:
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('team_id', postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column('name', sa.String(length=100), nullable=False),
-        sa.Column('category', sa.Enum('sprint', 'distance', name='exercisecategory'), nullable=False),
+        sa.Column('category', postgresql.ENUM('sprint', 'distance', name='exercisecategory', create_type=False), nullable=False),
         sa.Column('distance_m', sa.Integer(), nullable=True),
         sa.Column('description', sa.Text(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False),
@@ -165,7 +158,7 @@ def upgrade() -> None:
         sa.Column('lap_number', sa.Integer(), nullable=False),
         sa.Column('lap_time_s', sa.Float(), nullable=False),
         sa.Column('stroke_count', sa.Integer(), nullable=False),
-        sa.Column('stroke_type', sa.Enum('freestyle', 'backstroke', 'breaststroke', 'butterfly', 'unknown', name='stroketype'), nullable=True),
+        sa.Column('stroke_type', postgresql.ENUM('freestyle', 'backstroke', 'breaststroke', 'butterfly', 'unknown', name='stroketype', create_type=False), nullable=True),
         sa.Column('velocity_m_s', sa.Float(), nullable=True),
         sa.Column('stroke_rate_hz', sa.Float(), nullable=True),
         sa.Column('stroke_length_m', sa.Float(), nullable=True),
@@ -180,7 +173,7 @@ def upgrade() -> None:
         sa.Column('swimmer_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('event_name', sa.String(length=100), nullable=False),
         sa.Column('target_time_s', sa.Float(), nullable=False),
-        sa.Column('goal_type', sa.Enum('sprint', 'endurance', name='goaltype'), nullable=False),
+        sa.Column('goal_type', postgresql.ENUM('sprint', 'endurance', name='goaltype', create_type=False), nullable=False),
         sa.Column('start_date', sa.Date(), nullable=False),
         sa.Column('end_date', sa.Date(), nullable=False),
         sa.Column('is_active', sa.Boolean(), nullable=False),

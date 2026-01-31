@@ -15,7 +15,7 @@ from .database import Base
 
 
 # ---------------------------------------------------------------------------
-# Enums
+# Enums - values must match PostgreSQL enum values exactly (lowercase)
 # ---------------------------------------------------------------------------
 
 class Sex(str, PyEnum):
@@ -24,21 +24,21 @@ class Sex(str, PyEnum):
 
 
 class ExerciseCategory(str, PyEnum):
-    SPRINT = "sprint"
-    DISTANCE = "distance"
+    sprint = "sprint"
+    distance = "distance"
 
 
 class GoalType(str, PyEnum):
-    SPRINT = "sprint"
-    ENDURANCE = "endurance"
+    sprint = "sprint"
+    endurance = "endurance"
 
 
 class StrokeType(str, PyEnum):
-    FREESTYLE = "freestyle"
-    BACKSTROKE = "backstroke"
-    BREASTSTROKE = "breaststroke"
-    BUTTERFLY = "butterfly"
-    UNKNOWN = "unknown"
+    freestyle = "freestyle"
+    backstroke = "backstroke"
+    breaststroke = "breaststroke"
+    butterfly = "butterfly"
+    unknown = "unknown"
 
 
 # ---------------------------------------------------------------------------
