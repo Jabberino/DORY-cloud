@@ -22,29 +22,11 @@ class Sample(BaseModel):
     stroke_type: Optional[str] = None
 
 
-class BoutConfigIn(BaseModel):
-    """Configuration for swimming bout detection (acceleration-based)."""
-    accel_threshold: float = 12.0
-    gap_fill_seconds: float = 7.0
-    bout_filter_seconds: float = 30.0
-
-
-class LapConfigIn(BaseModel):
-    """Configuration for lap turn detection (gyroscope-based)."""
-    window_size_seconds: int = 1
-    cutoff_frequency_hz: float = 3.0
-    lap_turn_threshold: float = 1.2
-    boundary_buffer_seconds: int = 35
-    debounce_seconds: int = 35
-
-
 class SessionRequest(BaseModel):
     session_id: Optional[int] = None
     swimmer_id: Optional[int] = None
     exercise_id: Optional[int] = None
     pool_length_m: float = 50.0
-    bout_config: Optional[BoutConfigIn] = None
-    lap_config: Optional[LapConfigIn] = None
     samples: List[Sample]
 
 
@@ -146,10 +128,7 @@ def compute_metrics(req: SessionRequest) -> MetricsResponse:
 
     df = _build_dataframe_from_request(req)
 
-    bout_cfg = BoutConfig(**req.bout_config.model_dump()) if req.bout_config else BoutConfig()
-    lap_cfg = LapConfig(**req.lap_config.model_dump()) if req.lap_config else LapConfig()
-
-    per_lap_results, session_averages = run_pipeline_from_df(df, bout_config=bout_cfg, lap_config=lap_cfg)
+    per_lap_results, session_averages = run_pipeline_from_df(df, bout_config=BoutConfig(), lap_config=LapConfig())
     return _format_response(per_lap_results, session_averages, req.session_id, req.swimmer_id, req.exercise_id)
 
 
