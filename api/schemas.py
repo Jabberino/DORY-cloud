@@ -153,6 +153,26 @@ class ExerciseResponse(TimestampMixin):
 
 
 # ---------------------------------------------------------------------------
+# Pipeline config schemas
+# ---------------------------------------------------------------------------
+
+class BoutConfigSchema(BaseModel):
+    """Configuration for swimming bout detection (acceleration-based)."""
+    accel_threshold: float = 12.0
+    gap_fill_seconds: float = 7.0
+    bout_filter_seconds: float = 30.0
+
+
+class LapConfigSchema(BaseModel):
+    """Configuration for lap turn detection (gyroscope-based)."""
+    window_size_seconds: int = 1
+    cutoff_frequency_hz: float = 3.0
+    lap_turn_threshold: float = 1.2
+    boundary_buffer_seconds: int = 35
+    debounce_seconds: int = 35
+
+
+# ---------------------------------------------------------------------------
 # Session schemas
 # ---------------------------------------------------------------------------
 
@@ -178,6 +198,12 @@ class SessionCreate(BaseModel):
     pool_length_m: int = 50
     notes: Optional[str] = None
     samples: List[SensorSampleCreate] = []
+
+
+class ProcessSessionRequest(BaseModel):
+    """Optional pipeline config overrides for the /process endpoint."""
+    bout_config: Optional[BoutConfigSchema] = None
+    lap_config: Optional[LapConfigSchema] = None
 
 
 class LapResultResponse(BaseModel):

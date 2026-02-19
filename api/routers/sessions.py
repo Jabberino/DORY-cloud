@@ -1,6 +1,6 @@
 """Sessions router with ML pipeline integration."""
 
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
 
@@ -10,12 +10,12 @@ import pandas as pd
 
 from ..database import get_db
 from ..models import SwimSession, SensorSample, SessionResult, LapResult, Swimmer
-from ..schemas import SessionCreate, SessionResponse, SessionBrief
+from ..schemas import SessionCreate, SessionResponse, SessionBrief, ProcessSessionRequest
 
 # Import the existing ML pipeline
 import sys
 sys.path.insert(0, '..')
-from lap_stroke_pipeline import run_pipeline_from_df
+from lap_stroke_pipeline import run_pipeline_from_df, BoutConfig, LapConfig
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
@@ -89,7 +89,11 @@ def list_sessions_for_swimmer(swimmer_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.post("/{session_id}/process", response_model=SessionResponse)
-def process_session(session_id: UUID, db: Session = Depends(get_db)):
+def process_session(
+    session_id: UUID,
+    cfg: Optional[ProcessSessionRequest] = None,
+    db: Session = Depends(get_db),
+):
     """Run ML pipeline on session sensor data."""
     session = db.query(SwimSession).filter(SwimSession.id == session_id).first()
     if not session:
@@ -118,9 +122,13 @@ def process_session(session_id: UUID, db: Session = Depends(get_db)):
     # Add datetime column (required by pipeline)
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms', utc=True).dt.tz_convert('Asia/Manila')
     
+    # Build pipeline configs (use defaults when not provided)
+    bout_cfg = BoutConfig(**(cfg.bout_config.model_dump() if cfg and cfg.bout_config else {}))
+    lap_cfg = LapConfig(**(cfg.lap_config.model_dump() if cfg and cfg.lap_config else {}))
+
     # Run ML pipeline
     try:
-        per_lap_results, session_averages = run_pipeline_from_df(df)
+        per_lap_results, session_averages = run_pipeline_from_df(df, bout_config=bout_cfg, lap_config=lap_cfg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Pipeline error: {str(e)}")
     
